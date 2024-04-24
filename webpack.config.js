@@ -2,6 +2,7 @@ const path = require('path');
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
+	devtool: 'eval-source-map',
 	entry: "./src/index.ts",
 	output: {
 		path: path.resolve(__dirname, "dist"),
@@ -9,7 +10,7 @@ module.exports = {
 	},
 	resolve: {
 		extensions: [
-			'.ts', '.js',
+			'.ts', '.js', // Allows importing from .ts and .js files.
 		],
 	},
 	mode: "development",
