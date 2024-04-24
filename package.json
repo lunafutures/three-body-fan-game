@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider webpack --config webpack.config.js",
-    "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider webpack-dev-server"
+    "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider webpack-dev-server",
+    "tsc": "tsc"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "copy-webpack-plugin": "^5.0.0",
     "cross-env": "^7.0.3",
+    "typescript": "^5.4.5",
     "webpack": "^4.29.3",
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.5"
