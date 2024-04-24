@@ -1,0 +1,27 @@
+{
+  "name": "three-body-fan-game",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider webpack --config webpack.config.js",
+    "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider webpack-dev-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lunafutures/three-body-fan-game"
+  },
+  "author": "lunafutures",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lunafutures/three-body-fan-game/issues"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^5.0.0",
+    "cross-env": "^7.0.3",
+    "webpack": "^4.29.3",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "^3.1.5"
+  }
+}
