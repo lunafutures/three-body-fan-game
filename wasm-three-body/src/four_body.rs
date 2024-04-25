@@ -67,7 +67,7 @@ impl BodyVelocityPosition {
         }
     }
 
-    fn cumulative_force_from(
+    fn cumulative_force(
         &self,
         body1: &BodyVelocityPosition,
         body2: &BodyVelocityPosition,
@@ -77,12 +77,12 @@ impl BodyVelocityPosition {
             + self.force_from(body3)
     }
 
-    fn cumulative_force_velocity_from(
+    fn cumulative_force_and_velocity(
         &self,
         body1: &BodyVelocityPosition,
         body2: &BodyVelocityPosition,
         body3: &BodyVelocityPosition) -> AccelerationVelocity {
-            let acceleration = self.cumulative_force_from(body1, body2, body3);
+            let acceleration = self.cumulative_force(body1, body2, body3);
             AccelerationVelocity {
                 ax: acceleration.ax,
                 ay: acceleration.ay,
@@ -136,13 +136,13 @@ impl FourBodyVelocityPosition {
     fn euler_step_delta(&self) -> FourAccelerationVelocity {
         FourAccelerationVelocity {
             star_a:
-                self.star_a.cumulative_force_velocity_from(&self.star_b, &self.star_c, &self.planet),
+                self.star_a.cumulative_force_and_velocity(&self.star_b, &self.star_c, &self.planet),
             star_b:
-                self.star_b.cumulative_force_velocity_from(&self.star_a, &self.star_c, &self.planet),
+                self.star_b.cumulative_force_and_velocity(&self.star_a, &self.star_c, &self.planet),
             star_c:
-                self.star_c.cumulative_force_velocity_from(&self.star_a, &self.star_b, &self.planet),
+                self.star_c.cumulative_force_and_velocity(&self.star_a, &self.star_b, &self.planet),
             planet:
-                self.planet.cumulative_force_velocity_from(&self.star_a, &self.star_b, &self.star_c),
+                self.planet.cumulative_force_and_velocity(&self.star_a, &self.star_b, &self.star_c),
         }
     }
 
