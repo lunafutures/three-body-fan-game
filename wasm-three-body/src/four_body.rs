@@ -50,6 +50,7 @@ struct BodyVelocityPosition {
 }
 
 impl BodyVelocityPosition {
+    // Far-gravity additions should be added to this function
     fn force_from(&self, other: &BodyVelocityPosition) -> Acceleration {
         let dx = other.x - self.x;
         let dy = other.y - self.y;
@@ -59,6 +60,7 @@ impl BodyVelocityPosition {
         // a = g*M_other/r**2
         let acceleration_intensity = G * other.mass / distance.powi(2);
         let (sin, cos) = dy.atan2(dx).sin_cos();
+
         Acceleration {
             ax: acceleration_intensity * cos,
             ay: acceleration_intensity * sin,
