@@ -171,17 +171,136 @@ impl<'a, 'b> ops::Add<&'b FourAccelerationVelocity> for &'a FourBodyVelocityPosi
 #[cfg(test)]
 mod tests {
     use super::*;
+    use approx::{assert_relative_eq, assert_relative_ne, AbsDiffEq, RelativeEq};
 
-    // #[test]
-    // fn add_velocity_position_to_acceleration_velocity() {
-    //     let vp = BodyVelocityPosition {
-    //         x: 1., y: 2., vx: 3., vy: 4.
-    //     };
-    //     let av = AccelerationVelocity {
-    //         vx: 0.1, vy: 0.2, ax: 0.3, ay: 0.4
-    //     };
-    //     assert_eq!(vp + av, BodyVelocityPosition {
-    //         x: 1.1, y: 2.2, vx: 3.3, vy: 4.4
-    //     });
-    // }
+    impl RelativeEq for Acceleration {
+        fn default_max_relative() -> f64 {
+            f64::default_max_relative()
+        }
+
+        fn relative_eq(&self, other: &Self, epsilon: f64, max_relative: f64) -> bool {
+            f64::relative_eq(&self.ax, &other.ax, epsilon, max_relative) &&
+            f64::relative_eq(&self.ay, &other.ay, epsilon, max_relative)
+        }
+    }
+
+    impl AbsDiffEq for Acceleration {
+        type Epsilon = f64;
+        fn default_epsilon() -> Self::Epsilon {
+            f64::EPSILON
+        }
+
+        fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+            f64::abs_diff_eq(&self.ax, &other.ax, epsilon) &&
+            f64::abs_diff_eq(&self.ay, &other.ay, epsilon)
+        }
+    }
+
+    impl RelativeEq for AccelerationVelocity {
+        fn default_max_relative() -> f64 {
+            f64::default_max_relative()
+        }
+
+        fn relative_eq(&self, other: &Self, epsilon: f64, max_relative: f64) -> bool {
+            f64::relative_eq(&self.ax, &other.ax, epsilon, max_relative) &&
+            f64::relative_eq(&self.ay, &other.ay, epsilon, max_relative) &&
+            f64::relative_eq(&self.vx, &other.vx, epsilon, max_relative) &&
+            f64::relative_eq(&self.vy, &other.vy, epsilon, max_relative)
+        }
+    }
+
+    impl AbsDiffEq for AccelerationVelocity {
+        type Epsilon = f64;
+        fn default_epsilon() -> Self::Epsilon {
+            f64::EPSILON
+        }
+
+        fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+            f64::abs_diff_eq(&self.ax, &other.ax, epsilon) &&
+            f64::abs_diff_eq(&self.ay, &other.ay, epsilon) &&
+            f64::abs_diff_eq(&self.vx, &other.vx, epsilon) &&
+            f64::abs_diff_eq(&self.vy, &other.vy, epsilon)
+        }
+    }
+
+    macro_rules! bvp {
+        ($mass:expr, $x:expr, $y:expr) => {
+            BodyVelocityPosition {
+                mass: $mass,
+                x: $x,
+                y: $y,
+                vx: f64::NAN,
+                vy: f64::NAN,
+            }
+        };
+    }
+
+    #[test]
+    fn test_acc_add() {
+        assert_eq!(
+            Acceleration { ax: 1.0, ay: 2.0 } +
+            Acceleration { ay: 10.0, ax: 20.0 },
+            Acceleration { ax: 21.0, ay: 12.0 }
+        );
+    }
+
+    #[test]
+    fn test_accv_halve() {
+        assert_eq!(
+            AccelerationVelocity { ax: 0.0, ay: -1.0, vx: 2e10, vy: -4e-12 }.halve(),
+            AccelerationVelocity { ax: 0.0, ay: -0.5, vx: 1e10, vy: -2e-12 }
+        );
+    }
+
+    #[test]
+    fn test_bvp_force_from() {
+        let body = BodyVelocityPosition { mass: 1., vx: f64::NAN, vy: f64::NAN, x: -1., y: -1. };
+        let other = BodyVelocityPosition { mass: 100., vx: f64::NAN, vy: f64::NAN, x: 2., y: 3. };
+
+        assert_relative_eq!(
+            body.force_from(&other),
+            &Acceleration { ax: 1.6017792000000002e-10, ay: 2.1357056e-10 },
+        );
+        assert_relative_eq!(
+            other.force_from(&body),
+            &Acceleration { ax: -1.6017792000000004e-12, ay: -2.1357056e-12 },
+        );
+    }
+
+    #[test]
+    fn test_bvp_cumulative_force_and_velocity() {
+        const MASS: f64 = 1.0;
+        let body = BodyVelocityPosition { mass: f64::NAN, vx: 1.11, vy: 2.22, x: 0., y: 0.};
+        let other1 = bvp!(2. * MASS, 10., 0.);
+        let other2 = bvp!(1. * MASS, -10., 0.);
+        let other3 = bvp!(1. * MASS, 0., 10.);
+
+        let expected_acceleration = Acceleration { ax: 6.67408e-13, ay: 6.67408e-13 };
+        assert_relative_eq!(
+            body.cumulative_force(&other1, &other2, &other3),
+            &expected_acceleration
+        );
+
+        let expected_acceleration_velocity =
+            AccelerationVelocity { ax: expected_acceleration.ax, ay: expected_acceleration.ay, vx: 1.11, vy: 2.22 };
+        assert_relative_eq!(
+            body.cumulative_force_and_velocity(&other1, &other2, &other3),
+            &expected_acceleration_velocity
+        );
+    }
+
+    #[test]
+    fn test_bvp_add_acceleration() {
+        assert_eq!(
+            &BodyVelocityPosition { mass: 1.0, x: 2.0, y: 3.0, vx: 4.0, vy: 5.0 } +
+            &AccelerationVelocity { vx: 0.6, vy: 0.7, ax: 0.8, ay: 0.9 },
+            BodyVelocityPosition { mass: 1.0, x: 2.6, y: 3.7, vx: 4.8, vy: 5.9 },
+        );
+    }
+
+    #[test]
+    fn test_fav_halve() {
+        assert_relative_eq!(1e-10, 1.01e-10, max_relative=0.01);
+        assert_relative_ne!(1e-10, 1.1e-10, max_relative=0.01);
+    }
 }

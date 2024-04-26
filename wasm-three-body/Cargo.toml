@@ -27,6 +27,7 @@ features = ["console"]
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.42"
+approx = "0.5.1"
 
 [profile.release]
 opt-level = "s" # Tell `rustc` to optimize for small code size.
