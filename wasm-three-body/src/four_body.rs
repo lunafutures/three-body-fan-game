@@ -327,7 +327,7 @@ mod tests {
 
     #[test]
     fn test_fav_halve() {
-        assert_relative_eq!(
+        assert_eq!(
             FourAccelerationVelocity {
                 star_a: AccelerationVelocity { ax: 2., ay: 20., vx: 4., vy: 40. },
                 star_b: AccelerationVelocity { ax: 4., ay: 20., vx: 4., vy: 40. },
