@@ -223,6 +223,33 @@ mod tests {
         }
     }
 
+    impl RelativeEq for FourAccelerationVelocity {
+        fn default_max_relative() -> f64 {
+            f64::default_max_relative()
+        }
+
+        fn relative_eq(&self, other: &Self, epsilon: f64, max_relative: f64) -> bool {
+            AccelerationVelocity::relative_eq(&self.star_a, &other.star_a, epsilon, max_relative) &&
+            AccelerationVelocity::relative_eq(&self.star_b, &other.star_b, epsilon, max_relative) &&
+            AccelerationVelocity::relative_eq(&self.star_c, &other.star_c, epsilon, max_relative) &&
+            AccelerationVelocity::relative_eq(&self.planet, &other.planet, epsilon, max_relative)
+        }
+    }
+
+    impl AbsDiffEq for FourAccelerationVelocity {
+        type Epsilon = f64;
+        fn default_epsilon() -> Self::Epsilon {
+            f64::EPSILON
+        }
+
+        fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+            AccelerationVelocity::abs_diff_eq(&self.star_a, &other.star_a, epsilon) &&
+            AccelerationVelocity::abs_diff_eq(&self.star_b, &other.star_b, epsilon) &&
+            AccelerationVelocity::abs_diff_eq(&self.star_c, &other.star_c, epsilon) &&
+            AccelerationVelocity::abs_diff_eq(&self.planet, &other.planet, epsilon)
+        }
+    }
+
     macro_rules! bvp {
         ($mass:expr, $x:expr, $y:expr) => {
             BodyVelocityPosition {
@@ -300,7 +327,19 @@ mod tests {
 
     #[test]
     fn test_fav_halve() {
-        assert_relative_eq!(1e-10, 1.01e-10, max_relative=0.01);
-        assert_relative_ne!(1e-10, 1.1e-10, max_relative=0.01);
+        assert_relative_eq!(
+            FourAccelerationVelocity {
+                star_a: AccelerationVelocity { ax: 2., ay: 20., vx: 4., vy: 40. },
+                star_b: AccelerationVelocity { ax: 4., ay: 20., vx: 4., vy: 40. },
+                star_c: AccelerationVelocity { ax: 8., ay: 20., vx: 4., vy: 40. },
+                planet: AccelerationVelocity { ax: 16., ay: 20., vx: 4., vy: 40. },
+            }.halve(),
+            FourAccelerationVelocity {
+                star_a: AccelerationVelocity { ax: 1., ay: 10., vx: 2., vy: 20. },
+                star_b: AccelerationVelocity { ax: 2., ay: 10., vx: 2., vy: 20. },
+                star_c: AccelerationVelocity { ax: 4., ay: 10., vx: 2., vy: 20. },
+                planet: AccelerationVelocity { ax: 8., ay: 10., vx: 2., vy: 20. },
+            }
+        );
     }
 }
