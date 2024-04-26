@@ -154,6 +154,10 @@ impl FourBodyVelocityPosition {
 
         k4
     }
+
+    pub fn rk4_step(&self) -> FourBodyVelocityPosition {
+        self + &self.rk4_step_delta()
+    }
 }
 
 impl<'a, 'b> ops::Add<&'b FourAccelerationVelocity> for &'a FourBodyVelocityPosition {
