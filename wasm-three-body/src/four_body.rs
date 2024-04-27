@@ -1,5 +1,5 @@
 use std::ops;
-// use wasm_bindgen::prelude::*;
+use wasm_bindgen::prelude::*;
 
 const STAR_MASS: i32 = 333000;
 const EARTH_MASS: i32 = 1;
@@ -40,6 +40,7 @@ impl AccelerationVelocity {
     }
 }
 
+#[wasm_bindgen]
 #[derive(PartialEq, Debug)]
 struct BodyVelocityPosition {
     mass: f64,
@@ -92,6 +93,19 @@ impl BodyVelocityPosition {
     }
 }
 
+#[wasm_bindgen]
+impl BodyVelocityPosition {
+    pub fn create(mass: f64, vx: f64, vy: f64, x: f64, y: f64) -> BodyVelocityPosition {
+        BodyVelocityPosition { mass, vx, vy, x, y }
+    }
+
+    pub fn mass(&self) -> f64 { self.mass }
+    pub fn vx(&self) -> f64 { self.vx }
+    pub fn vy(&self) -> f64 { self.vy }
+    pub fn x(&self) -> f64 { self.x }
+    pub fn y(&self) -> f64 { self.y }
+}
+
 impl<'a, 'b> ops::Add<&'b AccelerationVelocity> for &'a BodyVelocityPosition {
     type Output = BodyVelocityPosition;
     fn add(self, rhs: &'b AccelerationVelocity) -> BodyVelocityPosition {
@@ -124,6 +138,7 @@ impl FourAccelerationVelocity {
     }
 }
 
+#[wasm_bindgen]
 #[derive(PartialEq, Debug)]
 struct FourBodyVelocityPosition {
     star_a: BodyVelocityPosition,
@@ -132,6 +147,7 @@ struct FourBodyVelocityPosition {
     planet: BodyVelocityPosition,
 }
 
+#[wasm_bindgen]
 impl FourBodyVelocityPosition {
     fn euler_step_delta(&self) -> FourAccelerationVelocity {
         FourAccelerationVelocity {
@@ -158,6 +174,14 @@ impl FourBodyVelocityPosition {
     pub fn rk4_step(&self) -> FourBodyVelocityPosition {
         self + &self.rk4_step_delta()
     }
+
+    pub fn create(
+        star_a: BodyVelocityPosition,
+        star_b: BodyVelocityPosition,
+        star_c: BodyVelocityPosition,
+        planet: BodyVelocityPosition) -> FourBodyVelocityPosition {
+        FourBodyVelocityPosition { star_a, star_b, star_c, planet }
+    }
 }
 
 impl<'a, 'b> ops::Add<&'b FourAccelerationVelocity> for &'a FourBodyVelocityPosition {
@@ -175,7 +199,7 @@ impl<'a, 'b> ops::Add<&'b FourAccelerationVelocity> for &'a FourBodyVelocityPosi
 #[cfg(test)]
 mod tests {
     use super::*;
-    use approx::{assert_relative_eq, assert_relative_ne, AbsDiffEq, RelativeEq};
+    use approx::{assert_relative_eq, AbsDiffEq, RelativeEq};
 
     impl RelativeEq for Acceleration {
         fn default_max_relative() -> f64 {
