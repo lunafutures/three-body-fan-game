@@ -41,13 +41,26 @@ impl AccelerationVelocity {
 }
 
 #[wasm_bindgen]
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Clone, Debug)]
 struct BodyVelocityPosition {
     mass: f64,
     vx: f64,
     vy: f64,
     x: f64,
     y: f64,
+}
+
+#[wasm_bindgen]
+impl BodyVelocityPosition {
+    pub fn create(mass: f64, vx: f64, vy: f64, x: f64, y: f64) -> BodyVelocityPosition {
+        BodyVelocityPosition { mass, vx, vy, x, y }
+    }
+
+    pub fn mass(&self) -> f64 { self.mass }
+    pub fn vx(&self) -> f64 { self.vx }
+    pub fn vy(&self) -> f64 { self.vy }
+    pub fn x(&self) -> f64 { self.x }
+    pub fn y(&self) -> f64 { self.y }
 }
 
 impl BodyVelocityPosition {
@@ -93,19 +106,6 @@ impl BodyVelocityPosition {
     }
 }
 
-#[wasm_bindgen]
-impl BodyVelocityPosition {
-    pub fn create(mass: f64, vx: f64, vy: f64, x: f64, y: f64) -> BodyVelocityPosition {
-        BodyVelocityPosition { mass, vx, vy, x, y }
-    }
-
-    pub fn mass(&self) -> f64 { self.mass }
-    pub fn vx(&self) -> f64 { self.vx }
-    pub fn vy(&self) -> f64 { self.vy }
-    pub fn x(&self) -> f64 { self.x }
-    pub fn y(&self) -> f64 { self.y }
-}
-
 impl<'a, 'b> ops::Add<&'b AccelerationVelocity> for &'a BodyVelocityPosition {
     type Output = BodyVelocityPosition;
     fn add(self, rhs: &'b AccelerationVelocity) -> BodyVelocityPosition {
@@ -149,6 +149,25 @@ struct FourBodyVelocityPosition {
 
 #[wasm_bindgen]
 impl FourBodyVelocityPosition {
+    pub fn rk4_step(&self) -> FourBodyVelocityPosition {
+        self + &self.rk4_step_delta()
+    }
+
+    pub fn create(
+        star_a: BodyVelocityPosition,
+        star_b: BodyVelocityPosition,
+        star_c: BodyVelocityPosition,
+        planet: BodyVelocityPosition) -> FourBodyVelocityPosition {
+        FourBodyVelocityPosition { star_a, star_b, star_c, planet }
+    }
+
+    pub fn star_a(&self) -> BodyVelocityPosition { self.star_a.clone() }
+    pub fn star_b(&self) -> BodyVelocityPosition { self.star_b.clone() }
+    pub fn star_c(&self) -> BodyVelocityPosition { self.star_c.clone() }
+    pub fn planet(&self) -> BodyVelocityPosition { self.planet.clone() }
+}
+
+impl FourBodyVelocityPosition {
     fn euler_step_delta(&self) -> FourAccelerationVelocity {
         FourAccelerationVelocity {
             star_a:
@@ -169,18 +188,6 @@ impl FourBodyVelocityPosition {
         let k4 = (self + &k3).euler_step_delta();
 
         k4
-    }
-
-    pub fn rk4_step(&self) -> FourBodyVelocityPosition {
-        self + &self.rk4_step_delta()
-    }
-
-    pub fn create(
-        star_a: BodyVelocityPosition,
-        star_b: BodyVelocityPosition,
-        star_c: BodyVelocityPosition,
-        planet: BodyVelocityPosition) -> FourBodyVelocityPosition {
-        FourBodyVelocityPosition { star_a, star_b, star_c, planet }
     }
 }
 
